@@ -21,12 +21,13 @@ function pageRander() {
     pages.innerHTML = "";
     const pageData = notePage();
     pages.appendChild(pageData);
+    listRander(state[state.tab]);
   } else {
     pages.innerHTML = "";
     const pageData = taskPage();
     pages.appendChild(pageData);
+    listRander(state[state.tab]);
   }
-  render();
 }
 
 function save() {
@@ -43,7 +44,124 @@ function init() {
 }
 init();
 
-function edit(e) {}
+function taskEdit(e) {
+  const { index, element } = findIndex(e);
+  const val = state.tasks[index];
+  element.innerHTML = "";
+  const data = taskEditComponent(val);
+  element.replaceWith(data);
+}
+
+function updateTask(e) {
+  const { index, element } = findIndex(e);
+  const editInputVal = document.querySelector("#taskEditInput");
+  const editDateInputVal = document.querySelector("#taskDateInput");
+  const editCatagoryVal = document.querySelector("#catagory");
+  const val = state.tasks[index];
+  val.task = editInputVal.value;
+  val.catagory = editCatagoryVal.value;
+  val.date = editDateInputVal.value;
+  element.innerHTML = "";
+  const data = taskComponent(val);
+  element.replaceWith(data);
+  save();
+}
+function cancelUpdate(e) {
+  const { index, element } = findIndex(e);
+  const val = state.tasks[index];
+  element.innerHTML = "";
+  const data = taskComponent(val);
+  element.replaceWith(data);
+}
+
+function taskEditComponent(val) {
+  const editOuterDiv = document.createElement("div");
+  editOuterDiv.id = val.id;
+  const taskEditInput = document.createElement("input");
+  taskEditInput.setAttribute("id", "taskEditInput");
+  taskEditInput.value = val.task;
+  taskEditInput.type = "text";
+  const taskDateInput = document.createElement("input");
+  taskDateInput.id = "taskDateInput";
+  taskDateInput.type = "date";
+  taskDateInput.value = val.date;
+  const catagoryInput = document.createElement("select");
+  catagoryInput.value = val.catagory;
+  catagoryInput.id = "editCatagory";
+  const workOp = document.createElement("option");
+  workOp.value = "work";
+  workOp.innerText = "work";
+  const homeOp = document.createElement("option");
+  homeOp.value = "home";
+  homeOp.innerText = "home";
+  const studyOp = document.createElement("option");
+  studyOp.value = "study";
+  studyOp.innerText = "study";
+  const updateBtn = document.createElement("button");
+  updateBtn.innerHTML = "Update";
+  updateBtn.addEventListener("click", updateTask);
+  const cancelBtn = document.createElement("button");
+  cancelBtn.innerHTML = "Cancel";
+  cancelBtn.addEventListener("click", cancelUpdate);
+  catagoryInput.append(workOp);
+  catagoryInput.append(homeOp);
+  catagoryInput.append(studyOp);
+  editOuterDiv.append(taskEditInput);
+  editOuterDiv.append(taskDateInput);
+  editOuterDiv.append(catagoryInput);
+  editOuterDiv.append(updateBtn);
+  editOuterDiv.append(cancelBtn);
+  return editOuterDiv;
+}
+
+function noteEdit(e) {
+  const { index, element } = findIndex(e);
+  element.innerHTML = "";
+  const val = state.notes[index];
+  const data = noteEditComponent(val);
+  element.replaceWith(data);
+}
+function updateNoteEdit(e) {
+  const { index, element } = findIndex(e);
+  const editNoteTitleVal = document.querySelector("#eidtTitleHolder");
+  const editNoteTextVal = document.querySelector("#editTextHolder");
+  const val = state.notes[index];
+  val.title = editNoteTitleVal.value;
+  val.text = editNoteTextVal.value;
+  const data = noteComponent(val);
+  element.replaceWith(data);
+  save();
+}
+
+function noteEditComponent(val) {
+  const outerdiv = document.createElement("div");
+  outerdiv.id = val.id;
+  const eidtTitleHolder = document.createElement("input");
+  eidtTitleHolder.value = val.title;
+  eidtTitleHolder.id = "eidtTitleHolder";
+  const editTextHolder = document.createElement("textarea");
+  editTextHolder.value = val.text;
+  editTextHolder.id = "editTextHolder";
+  const upadetBtn = document.createElement("button");
+  upadetBtn.innerText = "Update";
+  upadetBtn.addEventListener("click", updateNoteEdit);
+  const cancelBtn = document.createElement("button");
+  cancelBtn.addEventListener("click", cancelEdit);
+  cancelBtn.innerText = "cancel";
+  outerdiv.append(eidtTitleHolder);
+  outerdiv.append(editTextHolder);
+  outerdiv.append(upadetBtn);
+  outerdiv.append(cancelBtn);
+  return outerdiv;
+}
+
+function cancelEdit(e) {
+  const { index, element } = findIndex(e);
+  element.innerHTML = "";
+  const val = state.notes[index];
+  const data = noteComponent(val);
+  element.replaceWith(data);
+}
 
 function findIndex(e) {
   const element = e.target.parentElement;
@@ -51,10 +169,9 @@ function findIndex(e) {
   return { index, element };
 }
 function del(e) {
-  const { index, element } = findIndex(e);
-  element.remove();
+  const { index } = findIndex(e);
   state[state.tab].splice(index, 1);
-  render();
+  listRander(state[state.tab]);
   save();
 }
 function component(val) {
@@ -63,9 +180,6 @@ function component(val) {
   } else {
     return taskComponent(val);
   }
-}
-function render() {
-  listRander(state[state.tab]);
 }
 
 function listRander(list) {
@@ -88,7 +202,7 @@ function addNote(e) {
   titleInput.value = "";
   textInput.value = "";
   save();
-  render();
+  listRander(state[state.tab]);
 }
 function addTask(e) {
   const { taskInput, dateInput, catagory } = tasksDomSelector(e);
@@ -103,7 +217,7 @@ function addTask(e) {
   dateInput.value = "";
   catagory.value = "work";
   save();
-  render();
+  listRander(state[state.tab]);
 }
 function tasksDomSelector(e) {
   const data = e.target.closest("#outerDiv");
@@ -151,7 +265,7 @@ function notePage() {
 }
 function filter() {
   if (state.filter == "all") {
-    render();
+    listRander(state[state.tab]);
   }
   if (state.filter == "pending") {
     const data = state.tasks.filter((val) => !val.completed);
@@ -233,11 +347,10 @@ function noteComponent(val) {
   textHolder.innerHTML = val.text;
   const editBtn = document.createElement("button");
   editBtn.innerText = "Edit";
-  editBtn.addEventListener("click", edit);
+  editBtn.addEventListener("click", noteEdit);
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
   deleteBtn.addEventListener("click", del);
-
   outerdiv.append(titleHolder);
   outerdiv.append(textHolder);
   outerdiv.append(editBtn);
@@ -261,12 +374,12 @@ function taskComponent(val) {
   catagoryHolder.innerHTML = val.catagory;
   const editBtn = document.createElement("button");
   editBtn.innerText = "Edit";
-  editBtn.addEventListener("click", edit);
+  editBtn.addEventListener("click", taskEdit);
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
   deleteBtn.addEventListener("click", del);
   const toggleBtn = document.createElement("button");
-  toggleBtn.innerHTML= "Done"
+  toggleBtn.innerHTML = "Done";
   toggleBtn.addEventListener("click", toggleComplete);
   outerdiv.append(toggleBtn);
   outerdiv.append(taskHolder);
